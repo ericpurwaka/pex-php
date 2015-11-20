@@ -7,6 +7,8 @@ class Card
     public $cardNumber;
     public $status;
 
+    protected $connection;
+
     public static $updateableCardStatuses = array('BLOCKED', 'OPEN', 'INACTIVE');
     public static $validNewStatuses = array('OPEN', 'BLOCKED');
 
