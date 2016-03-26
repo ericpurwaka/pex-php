@@ -2,17 +2,14 @@
 
 return [
 
-    'username' => '',
-
-    'password' => '',
+    'BASE_PRODUCTION' => 'https://coreapi.pexcard.com/v42/',
+    'BASE_SANDBOX' => 'https://corebeta.pexcard.com/api/v42/',
 
     'urls' => [
-
-        'accountlist'           => 'https://coreapi.pexcard.com/v3/admin/cardlist',
-        'accountdetails'        => 'https://coreapi.pexcard.com/v3/admin/carddetails',
-        'accountfund'           => 'https://coreapi.pexcard.com/v3/admin/fund',
-        'cardupdatestatus'      => 'https://coreapi.pexcard.com/v3/admin/changecardstatus',
-        'accountfundingreport'  => 'https://coreapi.pexcard.com/v3/admin/cardfundingreport'
+        'masteraccountdetails'  => 'Details/AccountDetails',
+        'accountdetails'        => 'Details/AccountDetails/{id}',
+        'accountfund'           => 'Card/Fund/{id}',
+        'cardupdatestatus'      => 'Card/Status/{id}'
     ]
 
 ];

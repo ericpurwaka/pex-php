@@ -110,16 +110,23 @@ class Account
     protected function fill($account)
     {
         if ($account) {
-            $this->id               = $account['id'];
-            $this->firstName        = $account['firstName'];
-            $this->lastName         = $account['lastName'];
-            $this->ledgerBalance    = $account['ledgerBalance'];
-            $this->availableBalance = $account['availableBalance'];
-            $this->status           = $account['status'];
+            $this->id               = $account['AccountId'];
+            if (isset($account['FirstName'])) {
+                $this->firstName = $account['FirstName'];
+            }
+            if (isset($account['LastName'])) {
+                $this->lastName = $account['LastName'];
+            }
+            $this->ledgerBalance    = $account['LedgerBalance'];
+            $this->availableBalance = $account['AvailableBalance'];
+            $this->status           = $account['AccountStatus'];
 
-            $this->cards = [];
-            foreach($account['cards'] as $c) {
-                $this->cards[] = new Card($this->connection, $c);
+            $this->cards = null;
+
+            if (isset($account["CardList"])) {
+                foreach ($account['CardList'] as $c) {
+                    $this->cards[] = new Card($this->connection, $c);
+                }
             }
         }
 

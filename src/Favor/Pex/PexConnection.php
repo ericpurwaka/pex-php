@@ -10,12 +10,15 @@ use \Guzzle\Http\Subscriber\History;
 
 class PexConnection {
 
-    public function __construct($creds)
+    private $auth;
+    private $config;
+
+    public function __construct($config)
     {
-        $this->setConfiguration($creds);
+        $this->setConfiguration($config);
     }
 
-    public function setConfiguration($creds)
+    public function setConfiguration($config)
     {
         $basePath = str_finish(dirname(__FILE__), '/../../');
         $defaultConfigPath = $basePath . 'config';
@@ -23,29 +26,31 @@ class PexConnection {
         $defaultLoader = new FileLoader(new Filesystem, $defaultConfigPath);
         $this->config = new Repository($defaultLoader, 'production');
 
-        $this->config->set('pexconnection.username', $creds['username']);
-        $this->config->set('pexconnection.password', $creds['password']);
+        if($_SERVER['APPLICATION_ENVIRONMENT'] == 'production') {
+            $this->base_url = $this->config->get('pexconnection.BASE_PRODUCTION');
+        } else {
+            $this->base_url = $this->config->get('pexconnection.BASE_SANDBOX');
+        }
 
-        $this->creds = [
-            'password' => $this->config->get('pexconnection.password'),
-            'username' => $this->config->get('pexconnection.username')
+        $this->auth = [
+            'Authorization' => 'token ' . $config['token']
         ];
     }
 
-    public function allAccounts()
+    public function masterAccount()
     {
-        $url = $this->config->get('pexconnection.urls.accountlist');
+        $url = $this->config->get('pexconnection.urls.masteraccountdetails');
 
-        return self::post($url, $this->creds);
+        return self::get($url);
     }
 
     public function findAccount($id)
     {
-        $url = $this->config->get('pexconnection.urls.accountdetails');
+        $url = str_replace('{id}', $id, $this->config->get('pexconnection.urls.accountdetails'));
 
-        $postData = array_merge($this->creds, array('id' => $id));
+        $postData = array('id' => $id);
 
-        return self::post($url, $postData);
+        return self::get($url, $postData);
     }
 
     public function fund($id, $amount)
@@ -54,9 +59,9 @@ class PexConnection {
             throw new PexException('Bad Amount');
         }
 
-        $url = $this->config->get('pexconnection.urls.accountfund');
+        $url = str_replace('{id}', $id, $this->config->get('pexconnection.urls.accountfund'));
 
-        $postData = array_merge($this->creds, array('id' => $id, 'amount' => $amount));
+        $postData = array('Amount' => $amount);
 
         return self::post($url, $postData);
     }
@@ -67,20 +72,49 @@ class PexConnection {
             throw new PexException('Bad Card Status');
         }
 
-        $url = $this->config->get('pexconnection.urls.cardupdatestatus');
+        $url =  str_replace('{id}', $id, $this->config->get('pexconnection.urls.cardupdatestatus'));
 
-        $postData = array_merge($this->creds, array('id' => $id, 'status' => $status));
+        $putData = array('Status' => $status);
 
-        return self::post($url, $postData);
+        $response = self::put($url, $putData);
+
+        return $response->getStatusCode() == 200;
     }
 
-    public static function post($url, $data)
+    public function post($url, $data)
     {
         $client = new Client();
+        $client->setDefaultOption('headers',$this->auth);
 
-        $request = $client->post($url);
+        $request = $client->post($this->base_url . $url);
 
         $request->setBody(json_encode($data), 'application/json');
+
+        $response = $request->send();
+
+        return $response->json();
+    }
+
+    public function put($url, $data)
+    {
+        $client = new Client();
+        $client->setDefaultOption('headers',$this->auth);
+
+        $request = $client->put($this->base_url . $url);
+
+        $request->setBody(json_encode($data), 'application/json');
+
+        $response = $request->send();
+
+        return $response;
+    }
+
+    public function get($url)
+    {
+        $client = new Client();
+        $client->setDefaultOption('headers',$this->auth);
+
+        $request = $client->get($this->base_url . $url);
 
         $response = $request->send();
 

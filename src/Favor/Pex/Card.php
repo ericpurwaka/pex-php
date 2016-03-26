@@ -6,11 +6,13 @@ class Card
     public $id;
     public $cardNumber;
     public $status;
+    public $expires_at;
+    public $issued_at;
 
     protected $connection;
 
-    public static $updateableCardStatuses = array('BLOCKED', 'OPEN', 'INACTIVE');
-    public static $validNewStatuses = array('OPEN', 'BLOCKED');
+    public static $updateableCardStatuses = array('BLOCKED', 'ACTIVE');
+    public static $validNewStatuses = array('ACTIVE', 'BLOCKED');
 
     public function __construct($creds_or_conn, $card = NULL)
     {
@@ -44,12 +46,26 @@ class Card
     //********** Protected Member Functions *********************
     //*************************************************
 
+    /**
+     * @param $cardArray
+     *
+     * v4 spec
+     * {
+     *   "CardId": 0,
+     *   "IssuedDate": "",
+     *   "ExpirationDate": "",
+     *   "Last4CardNumber": "",
+     *   "CardStatus": ""
+     *   }
+     */
     protected function fill($cardArray)
     {
         if ($cardArray) {
-            $this->id           = $cardArray['id'];
-            $this->cardNumber   = $cardArray['cardNumber'];
-            $this->status       = $cardArray['status'];
+            $this->id           = $cardArray['CardId'];
+            $this->cardNumber   = $cardArray['Last4CardNumber'];
+            $this->status       = $cardArray['CardStatus'];
+            $this->expires_at   = $cardArray['ExpirationDate'];
+            $this->issued_at    = $cardArray['IssuedDate'];
         }
     }
 

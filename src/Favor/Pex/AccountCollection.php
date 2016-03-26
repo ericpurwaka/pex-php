@@ -8,10 +8,12 @@ class AccountCollection extends \Illuminate\Support\Collection
     public function __construct($creds)
     {
         $this->connection = new PexConnection($creds);
-        $accountlist = $this->connection->allAccounts();
+
+        $masterAccount = $this->connection->masterAccount();
+        $accountList = $masterAccount["CHAccountList"];
 
         $items = array();
-        foreach($accountlist as $act) {
+        foreach($accountList as $act) {
             $items[] = new Account($this->connection, $act);
         }
 
