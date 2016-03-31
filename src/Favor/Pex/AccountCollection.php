@@ -20,6 +20,9 @@ class AccountCollection extends \Illuminate\Support\Collection
         parent::__construct($items);
     }
 
-
+    public function defundAll()
+    {
+        return $this->connection->defundAll();
+    }
 
 }

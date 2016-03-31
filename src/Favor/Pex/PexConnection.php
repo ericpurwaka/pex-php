@@ -63,7 +63,16 @@ class PexConnection {
 
         $postData = array('Amount' => $amount);
 
-        return self::post($url, $postData);
+        $resp = self::post($url, $postData);
+
+        return $this->findAccount($resp['AccountId']);
+    }
+
+    public function defundAll()
+    {
+        $url = $this->config->get('pexconnection.urls.defundall');
+
+        return self::post($url, null);
     }
 
     public function updateCardStatus($id, $status)
@@ -77,6 +86,15 @@ class PexConnection {
         $putData = array('Status' => $status);
 
         $response = self::put($url, $putData);
+
+        return $response->getStatusCode() == 200;
+    }
+
+    public function activateCard($id)
+    {
+        $url =  str_replace('{id}', $id, $this->config->get('pexconnection.urls.cardactivate'));
+
+        $response = self::post($url, null);
 
         return $response->getStatusCode() == 200;
     }

@@ -21,6 +21,7 @@ class Account
     {
         $connection = new PexConnection($creds);
         $account = $connection->findAccount($pexAccountId);
+
         if ($account) {
             return new self($connection, $account);
         }
@@ -34,7 +35,7 @@ class Account
     {
         if (is_array($creds_or_conn)) {
             $this->connection = new PexConnection($creds_or_conn);
-        } elseif (is_object($creds_or_conn) and $creds_or_conn instanceof PexConnection) {
+        } elseif (is_object($creds_or_conn) && $creds_or_conn instanceof PexConnection) {
             $this->connection = $creds_or_conn;
         } else {
             throw new \Exception('Cannot create Account Object without credentials of connection');
@@ -47,7 +48,7 @@ class Account
 
     public function addFunds($amount)
     {
-        if (is_numeric($amount) and $amount > 0) {
+        if (is_numeric($amount) && $amount > 0) {
             $act = $this->connection->fund($this->id, $amount);
             $this->fill($act);
         }
@@ -57,7 +58,14 @@ class Account
 
     public function removeFunds($amount)
     {
-        if (is_numeric($amount) and $amount > 0) {
+        if (is_numeric($amount) && $amount > 0) {
+            $refreshedAccount = $this->connection->findAccount($this->id);
+            $availableBalance = $refreshedAccount['AvailableBalance'];
+
+            if ($amount > $availableBalance){
+                $amount = $availableBalance;
+            }
+
             $act = $this->connection->fund($this->id, -$amount);
             $this->fill($act);
         }
@@ -69,12 +77,12 @@ class Account
     {
         //refersh account just before defunding
         $refreshedAccount = $this->connection->findAccount($this->id);
+        $availableBalance = $refreshedAccount['AvailableBalance'];
 
-        $availableBalance = $refreshedAccount['availableBalance'];
         if ($availableBalance <= 0) {
             $this->fill($refreshedAccount);
         } else {
-            $removeBalance = -$refreshedAccount['availableBalance'];
+            $removeBalance = -$refreshedAccount['AvailableBalance'];
             $act = $this->connection->fund($this->id, $removeBalance);
             $this->fill($act);
         }
@@ -85,12 +93,12 @@ class Account
     public function updateCardStatuses($newStatus)
     {
         $upperedStatus = strtoupper($newStatus);
-        if (in_array($upperedStatus, Card::$updateableCardStatuses)) {
 
+        if (in_array($upperedStatus, Card::$updateableCardStatuses)) {
             $act = false;
 
             foreach($this->cards as $card) {
-                if ($card->status != $upperedStatus and in_array($card->status, Card::$updateableCardStatuses)) {
+                if ($card->status != $upperedStatus && in_array($card->status, Card::$updateableCardStatuses)) {
                     $act = $this->connection->updateCardStatus($card->id, $upperedStatus);
                 }
             }
@@ -110,21 +118,32 @@ class Account
     protected function fill($account)
     {
         if ($account) {
-            $this->id               = $account['AccountId'];
+            $this->id = $account['AccountId'];
+
             if (isset($account['FirstName'])) {
                 $this->firstName = $account['FirstName'];
             }
+
             if (isset($account['LastName'])) {
                 $this->lastName = $account['LastName'];
             }
-            $this->ledgerBalance    = $account['LedgerBalance'];
-            $this->availableBalance = $account['AvailableBalance'];
-            $this->status           = $account['AccountStatus'];
 
+            $this->ledgerBalance = $account['LedgerBalance'];
+            $this->availableBalance = $account['AvailableBalance'];
+            $this->status = $account['AccountStatus'];
             $this->cards = null;
 
-            if (isset($account["CardList"])) {
-                foreach ($account['CardList'] as $c) {
+            if (!isset($account['CardList'])) {
+                $temp = $this->connection->findAccount($this->id);
+
+                $cards = $temp['CardList'];
+            }
+            else {
+                $cards = $account['CardList'];
+            }
+
+            if ($cards) {
+                foreach ($cards as $c) {
                     $this->cards[] = new Card($this->connection, $c);
                 }
             }

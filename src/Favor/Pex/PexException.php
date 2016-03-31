@@ -1,6 +1,6 @@
 <?php namespace Favor\Pex;
 
-use \Exception
+use \Exception;
 
 class PexException extends Exception{
 

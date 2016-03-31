@@ -9,7 +9,9 @@ return [
         'masteraccountdetails'  => 'Details/AccountDetails',
         'accountdetails'        => 'Details/AccountDetails/{id}',
         'accountfund'           => 'Card/Fund/{id}',
-        'cardupdatestatus'      => 'Card/Status/{id}'
+        'cardupdatestatus'      => 'Card/Status/{id}',
+        'cardactivate'          => 'Card/Activate/{id}',
+        'defundall'             => 'Bulk/Zero'
     ]
 
 ];
