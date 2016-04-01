@@ -133,18 +133,13 @@ class Account
             $this->status = $account['AccountStatus'];
             $this->cards = null;
 
-            if (!isset($account['CardList'])) {
-                $temp = $this->connection->findAccount($this->id);
-
-                $cards = $temp['CardList'];
-            }
-            else {
+            if (isset($account['CardList'])) {
                 $cards = $account['CardList'];
-            }
 
-            if ($cards) {
-                foreach ($cards as $c) {
-                    $this->cards[] = new Card($this->connection, $c);
+                if ($cards) {
+                    foreach ($cards as $c) {
+                        $this->cards[] = new Card($this->connection, $c);
+                    }
                 }
             }
         }
