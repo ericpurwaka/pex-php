@@ -136,10 +136,8 @@ class Account
             if (isset($account['CardList'])) {
                 $cards = $account['CardList'];
 
-                if ($cards) {
-                    foreach ($cards as $c) {
-                        $this->cards[] = new Card($this->connection, $c);
-                    }
+                foreach ($cards as $c) {
+                    $this->cards[] = new Card($this->connection, $c);
                 }
             }
         }
