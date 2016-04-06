@@ -99,6 +99,13 @@ class PexConnection {
         return $response->getStatusCode() == 200;
     }
 
+    public function renewToken()
+    {
+        $url = $this->config->get('pexconnection.urls.renewtoken');
+
+        return self::post($url, null);
+    }
+
     public function post($url, $data)
     {
         $client = new Client();

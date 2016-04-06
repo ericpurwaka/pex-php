@@ -11,7 +11,8 @@ return [
         'accountfund'           => 'Card/Fund/{id}',
         'cardupdatestatus'      => 'Card/Status/{id}',
         'cardactivate'          => 'Card/Activate/{id}',
-        'defundall'             => 'Bulk/Zero'
+        'defundall'             => 'Bulk/Zero',
+        'renewtoken'            => 'Token/Renew'
     ]
 
 ];
